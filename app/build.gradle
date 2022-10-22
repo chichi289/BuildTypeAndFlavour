@@ -1,0 +1,137 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        applicationId "com.chichi289.buildtypeflavour"
+        minSdk 21
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.debug
+    }
+
+    signingConfigs {
+        customer {
+            keyAlias 'customer@123'
+            keyPassword 'customer@123'
+            storeFile file('../credentials/customer-keystore.jks')
+            storePassword 'customer@123'
+        }
+        driver {
+            keyAlias 'driver@123'
+            keyPassword 'driver@123'
+            storeFile file('../credentials/driver-keystore.jks')
+            storePassword 'driver@123'
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            manifestPlaceholders = [app_name: "DebugApp"]
+            buildConfigField "String", "BASE_URL", "$LOCAL_URL"
+
+        }
+        staging {
+            applicationIdSuffix ".staging"
+            manifestPlaceholders = [app_name: "StagingApp"]
+            buildConfigField "String", "BASE_URL", "$STAGING_URL"
+
+        }
+        qa {
+            applicationIdSuffix ".qa"
+            manifestPlaceholders = [app_name: "QaApp"]
+            buildConfigField "String", "BASE_URL", "$QA_URL"
+
+        }
+        release {
+            manifestPlaceholders = [app_name: "BuildTypeFlavour"]
+            buildConfigField "String", "BASE_URL", "$LIVE_URL"
+
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    /*project.android.variantFilter {
+        def names = it.flavors*.name
+        if (it.buildType.name == 'debug') {
+            if (names.contains("driver")) {
+                it.ignore = true
+            }
+        }
+    }*/
+
+    flavorDimensions "user_type"
+
+    productFlavors {
+        customer {
+            dimension "user_type"
+            applicationId "com.chichi289.buildtypeflavour.customer"
+            //applicationIdSuffix ".customer"
+            //versionCode 1
+            versionCode 1000 + android.defaultConfig.versionCode
+            versionName "1.0"
+            versionNameSuffix "-customer"
+            signingConfig signingConfigs.customer
+        }
+        driver {
+            dimension "user_type"
+            applicationId "com.chichi289.buildtypeflavour.driver"
+            //applicationIdSuffix ".driver"
+            //versionCode 1
+            versionCode 2000 + android.defaultConfig.versionCode
+            versionName "1.0"
+            versionNameSuffix "-driver"
+            signingConfig signingConfigs.driver
+        }
+    }
+
+    /*sourceSets {
+        customer {
+            res {
+                srcDirs 'src/customer/res'
+            }
+            kotlin {
+                srcDirs 'src/customer/kotlin'
+                manifest.srcFile 'src/customer/AndroidManifest.xml'
+            }
+        }
+        driver {
+            res {
+                srcDirs 'src/driver/res'
+            }
+            kotlin {
+                srcDirs 'src/driver/kotlin'
+                manifest.srcFile 'src/driver/AndroidManifest.xml'
+            }
+        }
+    }*/
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    //noinspection GradleDependency
+    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}
